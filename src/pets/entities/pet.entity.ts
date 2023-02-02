@@ -1,1 +1,6 @@
-export class Pet {}
+export class Pet {
+    id: Number
+    variety: String
+    gender: String
+    age: Number
+}
