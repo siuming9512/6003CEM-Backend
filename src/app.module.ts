@@ -1,12 +1,15 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { PetsModule } from './pets/pets.module';
 import { FeedsModule } from './feeds/feeds.module';
+import { AutomapperModule } from '@automapper/nestjs';
+import { pojos } from '@automapper/pojos';
 
 @Module({
-  imports: [PetsModule, FeedsModule],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    PetsModule, 
+    FeedsModule, 
+    AutomapperModule.forRoot({
+      strategyInitializer: pojos(),
+    }),],
 })
-export class AppModule {}
+export class AppModule { }

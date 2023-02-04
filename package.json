@@ -20,10 +20,20 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@automapper/classes": "^8.7.7",
+    "@automapper/core": "^8.7.7",
+    "@automapper/nestjs": "^8.7.7",
+    "@automapper/pojos": "^8.7.7",
     "@nestjs/common": "^9.0.0",
     "@nestjs/core": "^9.0.0",
     "@nestjs/mapped-types": "*",
+    "@nestjs/passport": "^9.0.1",
     "@nestjs/platform-express": "^9.0.0",
+    "@nestjs/swagger": "^6.1.4",
+    "@prisma/client": "^4.9.0",
+    "@types/passport-local": "^1.0.35",
+    "passport": "^0.6.0",
+    "passport-local": "^1.0.0",
     "prisma": "^4.9.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0"
@@ -47,8 +57,7 @@
     "supertest": "^6.1.3",
     "ts-jest": "29.0.3",
     "ts-loader": "^9.2.3",
-    "ts-node": "^10.0.0",
-    "tsconfig-paths": "4.1.1",
+    "tsconfig-paths": "^4.1.2",
     "typescript": "^4.7.4"
   },
   "jest": {

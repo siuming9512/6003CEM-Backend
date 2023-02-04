@@ -2,33 +2,60 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { PetsService } from './pets.service';
 import { CreatePetDto } from './dto/create-pet.dto';
 import { UpdatePetDto } from './dto/update-pet.dto';
-
+import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { Prisma, Pet } from '@prisma/client';
+import { Feed } from '@src/feeds/entities/feed.entity';
+import { PetEntity } from './entities/pet.entities';
 @Controller('pets')
+@ApiTags('pets')
 export class PetsController {
-  constructor(private readonly petsService: PetsService) {}
+  constructor(private petsService: PetsService) { }
 
-  @Post()
-  create(@Body() createPetDto: CreatePetDto) {
-    return this.petsService.create(createPetDto);
-  }
 
+  @ApiOkResponse({
+    description: 'The pets records',
+    type: PetEntity,
+    isArray: true
+  })
   @Get()
-  findAll() {
+  async findAll(): Promise<Pet[]> {
     return this.petsService.findAll();
   }
 
+  @ApiOkResponse({
+    description: 'The pet record',
+    type: PetEntity
+  })
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string): Promise<Pet> {
     return this.petsService.findOne(+id);
   }
 
+  @ApiCreatedResponse({
+    description: 'The pet record created',
+    type: PetEntity
+  })
+  @Post()
+  async create(@Body() createPetDto: CreatePetDto): Promise<Pet> {
+    // const input = this.mapper.map<Prisma.PetCreateInput>(createPetDto, '');
+    return this.petsService.create(createPetDto);
+  }
+
+  @ApiOkResponse({
+    description: 'The pet record updated',
+    type: PetEntity
+  })
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePetDto: UpdatePetDto) {
+  async update(@Param('id') id: string, @Body() updatePetDto: UpdatePetDto): Promise<Pet> {
     return this.petsService.update(+id, updatePetDto);
   }
 
+  @ApiOkResponse({
+    description: 'The pet record deleted',
+    type: PetEntity
+  })
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string): Promise<Pet> {
     return this.petsService.remove(+id);
   }
 }

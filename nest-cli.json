@@ -4,5 +4,15 @@
   "sourceRoot": "src",
   "compilerOptions": {
     "deleteOutDir": true
+  },
+  "compilerOptions": {
+    "plugins": [
+      {
+        "name": "@nestjs/swagger",
+        "options": {
+          "dtoKeyOfComment": true
+        }
+      }
+    ]
   }
 }
