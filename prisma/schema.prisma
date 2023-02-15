@@ -16,3 +16,10 @@ model Pet {
   gender  String
   age     Int
 }
+
+model User {
+  id       String    @id @default(uuid())
+  username String
+  password String
+  staffNo  String
+}
