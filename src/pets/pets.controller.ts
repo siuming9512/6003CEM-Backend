@@ -6,6 +6,7 @@ import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swa
 import { Prisma, Pet } from '@prisma/client';
 import { Feed } from '@src/feeds/entities/feed.entity';
 import { PetEntity } from './entities/pet.entities';
+import { FavouritePet } from './dto/favourite-pet.dto';
 @Controller('pets')
 @ApiTags('pets')
 export class PetsController {
@@ -35,10 +36,16 @@ export class PetsController {
     description: 'The pet record created',
     type: PetEntity
   })
+
   @Post()
   async create(@Body() createPetDto: CreatePetDto): Promise<Pet> {
     // const input = this.mapper.map<Prisma.PetCreateInput>(createPetDto, '');
     return this.petsService.create(createPetDto);
+  }
+
+  @Post('favourite')
+  async favourite(@Body() FavouritePet: FavouritePet): Promise<number> {
+    
   }
 
   @ApiOkResponse({

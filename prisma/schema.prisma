@@ -15,6 +15,7 @@ model Pet {
   variety String
   gender  String
   age     Int
+  userFavouritePets UserFavouritePetMapping[]
 }
 
 model User {
@@ -22,4 +23,37 @@ model User {
   username String
   password String
   staffNo  String
+  userChatRooms UserChatRoom[]
+  userFavouritePets UserFavouritePetMapping[]
+}
+
+model UserFavouritePetMapping {
+  userId String
+  user User  @relation(fields: [userId], references: [id])
+  petId Int
+  pet Pet @relation(fields: [petId], references: [id])
+  @@id([userId, petId])
+}
+
+model ChatRoom {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  chatMessages ChatMessage[]
+  userChatRooms UserChatRoom[]
+}
+
+model ChatMessage {
+  id Int @id @default(autoincrement())
+  chatRoomId Int 
+  message String
+  sendBy String?
+  createdAt DateTime @default(now())
+  chatRoom ChatRoom @relation(fields: [chatRoomId], references: [id])
+}
+
+model UserChatRoom {
+  chatRoomId Int @id @default(autoincrement())
+  chatRoom ChatRoom @relation(fields: [chatRoomId], references: [id])
+  userId String
+  user User @relation(fields: [userId], references: [id])
 }
