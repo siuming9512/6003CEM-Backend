@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request } from '@nestjs/common';
 import { PetsService } from './pets.service';
 import { CreatePetDto } from './dto/create-pet.dto';
 import { UpdatePetDto } from './dto/update-pet.dto';
@@ -7,6 +7,7 @@ import { Prisma, Pet } from '@prisma/client';
 import { Feed } from '@src/feeds/entities/feed.entity';
 import { PetEntity } from './entities/pet.entities';
 import { FavouritePet } from './dto/favourite-pet.dto';
+import { JwtAuthGuard } from '@src/auth/guards/jwt-auth.guard';
 @Controller('pets')
 @ApiTags('pets')
 export class PetsController {
@@ -43,9 +44,24 @@ export class PetsController {
     return this.petsService.create(createPetDto);
   }
 
+  @ApiOkResponse({
+    description: 'save favourite pet',
+    type: PetEntity
+  })
+  @UseGuards(JwtAuthGuard)
   @Post('favourite')
-  async favourite(@Body() FavouritePet: FavouritePet): Promise<number> {
-    
+  async favourite(@Request() req, @Body() favouritePet: FavouritePet): Promise<boolean> {
+    return this.petsService.favourite(req.user.userId, favouritePet.petId);
+  }
+
+  @ApiOkResponse({
+    description: 'unfavourite pet',
+    type: PetEntity
+  })
+  @UseGuards(JwtAuthGuard)
+  @Post('unfavourite')
+  async unfavourite(@Request() req, @Body() favouritePet: FavouritePet): Promise<boolean> {
+    return this.petsService.unfavourite(req.user.userId, favouritePet.petId);
   }
 
   @ApiOkResponse({

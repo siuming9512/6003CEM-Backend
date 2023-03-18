@@ -1,34 +1,23 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { ChatroomService } from './chatroom.service';
-import { CreateChatroomDto } from './dto/create-chatroom.dto';
-import { UpdateChatroomDto } from './dto/update-chatroom.dto';
+import { ChatDto } from './dto/chat.dto';
+import { ChatMessage } from '@prisma/client';
+import { ApiTags } from '@nestjs/swagger';
 
-@Controller('chatroom')
+@Controller('chat')
+@ApiTags('chat')
 export class ChatroomController {
   constructor(private readonly chatroomService: ChatroomService) {}
 
-  @Post()
-  create(@Body() createChatroomDto: CreateChatroomDto) {
-    return this.chatroomService.create(createChatroomDto);
+  @Post('')
+  async chat(chatDto: ChatDto): Promise<boolean> {
+    const sent = await this.chatroomService.chat(chatDto);
+
+    return true;
   }
 
-  @Get()
-  findAll() {
-    return this.chatroomService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.chatroomService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateChatroomDto: UpdateChatroomDto) {
-    return this.chatroomService.update(+id, updateChatroomDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.chatroomService.remove(+id);
+  @Get(':userId/msgs')
+  findOne(@Param('userId') userId: string): Promise<ChatMessage[]> {
+    return this.chatroomService.getChatMsgsByUserId(userId);
   }
 }

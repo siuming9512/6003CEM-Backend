@@ -10,28 +10,28 @@ export class PetsService {
    *
    */
   constructor(private prisma: PrismaService) {
-    
+
   }
-  create(createPetDto: CreatePetDto): Promise<Pet> {
+  async create(createPetDto: CreatePetDto): Promise<Pet> {
     const input: Prisma.PetCreateInput = {
       variety: createPetDto.variety,
       gender: createPetDto.gender,
       age: createPetDto.age,
     }
-    const pet = this.prisma.pet.create({
+    const pet = await this.prisma.pet.create({
       data: input
     })
 
     return pet;
   }
 
-  findAll() {
-    const pets = this.prisma.pet.findMany();
+  async findAll() {
+    const pets = await this.prisma.pet.findMany();
     return pets;
   }
 
-  findOne(id: number): Promise<Pet> {
-    const pet = this.prisma.pet.findUniqueOrThrow({
+  async findOne(id: number): Promise<Pet> {
+    const pet = await this.prisma.pet.findUniqueOrThrow({
       where: {
         id
       }
@@ -39,14 +39,14 @@ export class PetsService {
     return pet;
   }
 
-  update(id: number, updatePetDto: UpdatePetDto): Promise<Pet> {
+  async update(id: number, updatePetDto: UpdatePetDto): Promise<Pet> {
     const updatePetInput: Prisma.PetUpdateInput = {
       variety: updatePetDto.variety,
       gender: updatePetDto.gender,
       age: updatePetDto.age,
     }
 
-    const updatedPet = this.prisma.pet.update({
+    const updatedPet = await this.prisma.pet.update({
       where: {
         id
       },
@@ -56,13 +56,42 @@ export class PetsService {
     return updatedPet;
   }
 
-  remove(id: number): Promise<Pet> {
-    const deletedPet = this.prisma.pet.delete({
+  async remove(id: number): Promise<Pet> {
+    const deletedPet = await this.prisma.pet.delete({
       where: {
         id
       }
     })
 
     return deletedPet;
+  }
+
+  async favourite(userId: string, petId): Promise<boolean> {
+    const input: Prisma.UserFavouritePetMappingCreateInput = {
+      user: {
+        connect: { id: userId }
+      },
+      pet: {
+        connect: { id: petId }
+      }
+    }
+    const favourited = await this.prisma.userFavouritePetMapping.create({
+      data: input
+    })
+
+    return !!favourited;
+  }
+
+  async unfavourite(userId: string, petId): Promise<boolean> {
+    const unfavourited = await this.prisma.userFavouritePetMapping.delete({
+      where: {
+        userId_petId: {
+          userId,
+          petId
+        }
+      }
+    })
+
+    return !!unfavourited;
   }
 }
