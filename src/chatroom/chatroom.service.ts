@@ -32,10 +32,10 @@ export class ChatroomService {
     return msgs;
   }
 
-  async chat(chatDto: ChatDto): Promise<ChatMessage> {
+  async chat(userId: string, chatDto: ChatDto): Promise<ChatMessage> {
     let userChatRoom: UserChatRoom = await this.prisma.userChatRoom.findFirst({
       where: {
-        userId: chatDto.sendBy
+        userId: userId
       }
     })
 
@@ -43,7 +43,7 @@ export class ChatroomService {
       const userChatroomInput: Prisma.UserChatRoomCreateInput = {
         user: {
           connect: {
-            id: chatDto.sendBy
+            id: userId
           }
         }, 
         chatRoom: {
@@ -61,7 +61,7 @@ export class ChatroomService {
 
     const chatMessageInput: Prisma.ChatMessageCreateInput = {
       message: chatDto.message,
-      sendBy: chatDto.sendBy,
+      sendBy: userId,
       chatRoom: {
         connect: {
           id: userChatRoom.chatRoomId

@@ -9,7 +9,6 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller('auth')
 @ApiTags('auth')
-@ApiBearerAuth('defaultBearerAuth')
 export class AuthController {
   constructor(private authService: AuthService) { }
 
@@ -39,6 +38,7 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
+  @ApiBearerAuth('defaultBearerAuth')
   getProfile(@Request() req) {
     return req.user;
   }

@@ -2,12 +2,13 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Request, UseGuards }
 import { ChatroomService } from './chatroom.service';
 import { ChatDto } from './dto/chat.dto';
 import { ChatMessage } from '@prisma/client';
-import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { ChatMessageEntity } from './entities/chatMessage.entity';
 import { JwtAuthGuard } from '@src/auth/guards/jwt-auth.guard';
 
 @Controller('chat')
 @ApiTags('chat')
+@ApiBearerAuth('defaultBearerAuth')
 export class ChatroomController {
   constructor(private readonly chatroomService: ChatroomService) {}
 
@@ -16,8 +17,9 @@ export class ChatroomController {
     description: 'chat message saved',
     type: ChatMessageEntity
   })
-  async chat(chatDto: ChatDto): Promise<ChatMessageEntity> {
-    const sent = await this.chatroomService.chat(chatDto);
+  @UseGuards(JwtAuthGuard)
+  async chat(@Request() req, chatDto: ChatDto): Promise<ChatMessageEntity> {
+    const sent = await this.chatroomService.chat(req.user.userId, chatDto);
 
     return sent;
   }

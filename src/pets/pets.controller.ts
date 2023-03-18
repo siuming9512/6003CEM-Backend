@@ -4,7 +4,6 @@ import { CreatePetDto } from './dto/create-pet.dto';
 import { UpdatePetDto } from './dto/update-pet.dto';
 import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { Prisma, Pet } from '@prisma/client';
-import { Feed } from '@src/feeds/entities/feed.entity';
 import { PetEntity } from './entities/pet.entities';
 import { FavouritePet } from './dto/favourite-pet.dto';
 import { JwtAuthGuard } from '@src/auth/guards/jwt-auth.guard';
