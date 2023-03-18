@@ -36,7 +36,6 @@ export class PetsController {
     description: 'The pet record created',
     type: PetEntity
   })
-
   @Post()
   async create(@Body() createPetDto: CreatePetDto): Promise<Pet> {
     // const input = this.mapper.map<Prisma.PetCreateInput>(createPetDto, '');
