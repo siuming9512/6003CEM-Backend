@@ -1,15 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { INestApplication, Injectable } from '@nestjs/common';
 import { CreatePetDto } from './dto/create-pet.dto';
 import { UpdatePetDto } from './dto/update-pet.dto';
-import { Pet, Prisma } from '@prisma/client';
+import { Pet, Prisma, } from '@prisma/client';
 import { PrismaService } from '@src/primsa.service';
+import { Gender } from './entities/gender.enum';
+import { existsSync, rename, renameSync } from 'fs';
+import { join } from 'path';
+import { ImageManager } from '@src/extensions/ImageManager';
 
 @Injectable()
 export class PetsService {
   /**
    *
    */
-  constructor(private prisma: PrismaService) {
+  constructor(
+    private prisma: PrismaService,
+    private imageManager: ImageManager
+  ) {
 
   }
   async create(createPetDto: CreatePetDto): Promise<Pet> {
@@ -22,11 +29,26 @@ export class PetsService {
       data: input
     })
 
+    this.imageManager.persistTmpImage(createPetDto.fileId);
+
+    pet.imageUrl = await this.imageManager.getImageUrl(createPetDto.fileId);
+
     return pet;
   }
 
-  async findAll() {
-    const pets = await this.prisma.pet.findMany();
+  async findAll(variety?: string, gender?: Gender, minAge?: number, maxAge?: number) {
+    const pets = await this.prisma.pet.findMany({
+      where: {
+        variety,
+        gender,
+        AND: [
+          {
+            age: { gte: minAge, lte: maxAge }
+          }
+        ]
+      }
+    });
+
     return pets;
   }
 

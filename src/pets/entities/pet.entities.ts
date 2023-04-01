@@ -10,4 +10,6 @@ export class PetEntity implements Pet {
     gender: string;
     @ApiProperty()
     age: number;
+    @ApiProperty()
+    imageUrl: string;
 }

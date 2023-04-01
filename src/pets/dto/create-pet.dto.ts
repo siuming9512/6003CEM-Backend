@@ -13,4 +13,6 @@ export class CreatePetDto {
     @Min(0)
     @Max(120)
     age: number
+    @ApiProperty()
+    fileId: string
 }

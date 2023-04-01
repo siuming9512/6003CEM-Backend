@@ -9,21 +9,10 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller('auth')
 @ApiTags('auth')
+@ApiBearerAuth('defaultBearerAuth')
 export class AuthController {
   constructor(private authService: AuthService) { }
 
-  // @Post('login')
-  // @ApiOkResponse({
-  //   type: UserEntity
-  // })
-  // @HttpCode(200)
-  // async login(@Body() loginDto: LoginDto): Promise<JwtLoginDto> {
-  //   const user = await this.authService.validateUser(loginDto.username, loginDto.password);
-
-  //   const jwt = this.authService.login(user);
-
-  //   return jwt;
-  // }
   @UseGuards(LocalAuthGuard)
   @Post('login')
   @ApiOkResponse({
@@ -38,7 +27,6 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  @ApiBearerAuth('defaultBearerAuth')
   getProfile(@Request() req) {
     return req.user;
   }
