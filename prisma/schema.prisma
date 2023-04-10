@@ -15,6 +15,7 @@ model Pet {
   variety String
   gender  String
   age     Int
+  imageFileName String @default("")
   userFavouritePets UserFavouritePetMapping[]
 }
 

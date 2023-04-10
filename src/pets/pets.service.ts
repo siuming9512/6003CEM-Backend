@@ -6,7 +6,8 @@ import { PrismaService } from '@src/primsa.service';
 import { Gender } from './entities/gender.enum';
 import { existsSync, rename, renameSync } from 'fs';
 import { join } from 'path';
-import { ImageManager } from '@src/extensions/ImageManager';
+import { ImageManager } from '@src/image/imageManager.service';
+import { PetDto } from './dto/pet.dto';
 
 @Injectable()
 export class PetsService {
@@ -19,24 +20,23 @@ export class PetsService {
   ) {
 
   }
-  async create(createPetDto: CreatePetDto): Promise<Pet> {
+  async create(createPetDto: CreatePetDto): Promise<PetDto> {
     const input: Prisma.PetCreateInput = {
       variety: createPetDto.variety,
       gender: createPetDto.gender,
       age: createPetDto.age,
+      imageFileName: createPetDto.imageFileName
     }
     const pet = await this.prisma.pet.create({
       data: input
     })
 
-    this.imageManager.persistTmpImage(createPetDto.fileId);
+    this.imageManager.persistTmpImage(createPetDto.imageFileName);
 
-    pet.imageUrl = await this.imageManager.getImageUrl(createPetDto.fileId);
-
-    return pet;
+    return this.parsePetDto(pet);
   }
 
-  async findAll(variety?: string, gender?: Gender, minAge?: number, maxAge?: number) {
+  async findAll(variety?: string, gender?: Gender, minAge?: number, maxAge?: number): Promise<PetDto[]> {
     const pets = await this.prisma.pet.findMany({
       where: {
         variety,
@@ -49,19 +49,21 @@ export class PetsService {
       }
     });
 
-    return pets;
+    const petDtos: PetDto[] = await Promise.all(pets.map(async (pet: Pet) => await this.parsePetDto(pet)));
+
+    return petDtos;
   }
 
-  async findOne(id: number): Promise<Pet> {
+  async findOne(id: number): Promise<PetDto> {
     const pet = await this.prisma.pet.findUniqueOrThrow({
       where: {
         id
       }
     })
-    return pet;
+    return this.parsePetDto(pet);
   }
 
-  async update(id: number, updatePetDto: UpdatePetDto): Promise<Pet> {
+  async update(id: number, updatePetDto: UpdatePetDto): Promise<PetDto> {
     const updatePetInput: Prisma.PetUpdateInput = {
       variety: updatePetDto.variety,
       gender: updatePetDto.gender,
@@ -75,7 +77,7 @@ export class PetsService {
       data: updatePetInput
     })
 
-    return updatedPet;
+    return this.parsePetDto(updatedPet);
   }
 
   async remove(id: number): Promise<Pet> {
@@ -84,6 +86,8 @@ export class PetsService {
         id
       }
     })
+
+    this.imageManager.deleteImage(deletedPet.imageFileName)
 
     return deletedPet;
   }
@@ -115,5 +119,15 @@ export class PetsService {
     })
 
     return !!unfavourited;
+  }
+
+  private async parsePetDto(pet: Pet): Promise<PetDto> {
+    return {
+      id: pet.id,
+      variety: pet.variety,
+      gender: pet.gender,
+      age: pet.age,
+      imageUrl: await this.imageManager.getImageUrl(pet.imageFileName)
+    }
   }
 }

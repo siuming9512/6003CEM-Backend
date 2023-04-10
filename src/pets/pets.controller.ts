@@ -10,12 +10,14 @@ import { JwtAuthGuard } from '@src/auth/guards/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { createWriteStream } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
+import { ImageManager } from '@src/image/imageManager.service';
+import { PetDto } from './dto/pet.dto';
 
 @Controller('pets')
 @ApiTags('pets')
 @ApiBearerAuth('defaultBearerAuth')
 export class PetsController {
-  constructor(private petsService: PetsService) { }
+  constructor(private petsService: PetsService, private imageManager: ImageManager) { }
 
   @ApiOkResponse({
     description: 'The pets records',
@@ -23,7 +25,7 @@ export class PetsController {
     isArray: true
   })
   @Get()
-  async findAll(keyword?: string): Promise<Pet[]> {
+  async findAll(keyword?: string): Promise<PetDto[]> {
     return this.petsService.findAll();
   }
 
@@ -32,7 +34,7 @@ export class PetsController {
     type: PetEntity
   })
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<Pet> {
+  async findOne(@Param('id') id: string): Promise<PetDto> {
     return this.petsService.findOne(+id);
   }
 
@@ -41,8 +43,8 @@ export class PetsController {
     type: PetEntity
   })
   @Post()
-  @UseGuards(JwtAuthGuard)
-  async create(@Body() createPetDto: CreatePetDto): Promise<Pet> {
+  // @UseGuards(JwtAuthGuard)
+  async create(@Body() createPetDto: CreatePetDto): Promise<PetDto> {
     // const input = this.mapper.map<Prisma.PetCreateInput>(createPetDto, '');
     return this.petsService.create(createPetDto);
   }
@@ -53,7 +55,7 @@ export class PetsController {
   })
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
-  async update(@Param('id') id: string, @Body() updatePetDto: UpdatePetDto): Promise<Pet> {
+  async update(@Param('id') id: string, @Body() updatePetDto: UpdatePetDto): Promise<PetDto> {
     return this.petsService.update(+id, updatePetDto);
   }
 
@@ -62,7 +64,7 @@ export class PetsController {
     type: PetEntity
   })
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   async remove(@Param('id') id: string): Promise<Pet> {
     return this.petsService.remove(+id);
   }
@@ -104,10 +106,8 @@ export class PetsController {
   )
   uploadFile(@UploadedFile() file: Express.Multer.File): string {
     const id = uuidv4();
-    const filename = `${id}.${file.mimetype.replace('image/', '')}`;
-    const ws = createWriteStream(`images/tmp/${filename}`)
-    ws.write(file.buffer)
-
-    return filename;
+    const fileName = `${id}.${file.mimetype.replace('image/', '')}`
+    this.imageManager.saveTmpImage(fileName, file.buffer)
+    return fileName;
   }
 }

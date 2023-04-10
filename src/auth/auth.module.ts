@@ -13,12 +13,19 @@ import { AuthController } from './auth.controller';
 @Module({
   controllers: [AuthController],
   imports: [
-    UsersModule, 
+    UsersModule,
     PassportModule,
     JwtModule.register({
       secret: jwtConstants.secret,
       signOptions: { expiresIn: '1d' },
-    }),],
-  providers: [AuthService, UsersService, PrismaService, LocalStrategy, JwtStrategy]
+    })
+  ],
+  providers: [
+    AuthService,
+    UsersService,
+    PrismaService,
+    LocalStrategy,
+    JwtStrategy
+  ]
 })
-export class AuthModule {}
+export class AuthModule { }
