@@ -12,4 +12,6 @@ export class PetDto {
     age: number
     @ApiProperty()
     imageUrl: string
+    @ApiProperty()
+    isFavourite: boolean
 }

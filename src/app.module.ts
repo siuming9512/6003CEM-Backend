@@ -9,6 +9,8 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { ConfigModule } from '@nestjs/config';
 import { ImageManagerModule } from './image/imageManager.module';
+import { ChatGateway } from './chat/chat.gateway';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -17,6 +19,7 @@ import { ImageManagerModule } from './image/imageManager.module';
     AuthModule,
     UsersModule,
     ChatroomModule,
+    // ChatModule,
     AutomapperModule.forRoot({
       strategyInitializer: pojos(),
     }),
@@ -28,5 +31,6 @@ import { ImageManagerModule } from './image/imageManager.module';
       isGlobal: true
     })
   ],
+  // providers: [ChatGateway],
 })
 export class AppModule { }

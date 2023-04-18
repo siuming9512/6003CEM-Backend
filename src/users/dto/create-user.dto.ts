@@ -7,9 +7,8 @@ export class CreateUserDto {
     @IsString()
     username: string
     @ApiProperty()
-    @IsStrongPassword()
     password: string
     @ApiProperty()
     @IsOptional()
-    staffNo?: string
+    staffRegisterCode?: string
 }

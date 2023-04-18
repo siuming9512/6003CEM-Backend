@@ -1,23 +1,29 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, BadRequestException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import { User } from '@prisma/client';
 
 @Controller('users')
 @ApiTags('users')
 @ApiBearerAuth('defaultBearerAuth')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private userService: UsersService) { }
 
+  @ApiCreatedResponse({
+    description: 'user created',
+  })
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  async create(@Body() createUserDto: CreateUserDto): Promise<boolean> {
+    const user = await this.userService.create(createUserDto);
+
+    return !!user;
   }
 
   @Get(':username')
   findOne(@Param('username') username: string) {
-    return this.usersService.findOne(username);
+    return this.userService.findOne(username);
   }
 
   // @Get()

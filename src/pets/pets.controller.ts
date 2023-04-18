@@ -26,7 +26,7 @@ export class PetsController {
   })
   @Get()
   async findAll(keyword?: string): Promise<PetDto[]> {
-    return this.petsService.findAll();
+    return this.petsService.findAll(undefined, undefined, undefined, undefined, '836a83d4-0f83-4076-afad-0a17b5ba5303');
   }
 
   @ApiOkResponse({
@@ -54,7 +54,7 @@ export class PetsController {
     type: PetEntity
   })
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   async update(@Param('id') id: string, @Body() updatePetDto: UpdatePetDto): Promise<PetDto> {
     return this.petsService.update(+id, updatePetDto);
   }
@@ -74,20 +74,24 @@ export class PetsController {
     description: 'save favourite pet',
     type: PetEntity
   })
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Post('favourite')
   async favourite(@Request() req, @Body() favouritePet: FavouritePet): Promise<boolean> {
-    return this.petsService.favourite(req.user.userId, favouritePet.petId);
+    const userId = '836a83d4-0f83-4076-afad-0a17b5ba5303'
+    // return this.petsService.favourite(req.user.userId, favouritePet.petId);
+    return this.petsService.favourite(userId, favouritePet.petId);
   }
 
   @ApiOkResponse({
     description: 'unfavourite pet',
     type: PetEntity
   })
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Post('unfavourite')
   async unfavourite(@Request() req, @Body() favouritePet: FavouritePet): Promise<boolean> {
-    return this.petsService.unfavourite(req.user.userId, favouritePet.petId);
+    const userId = '836a83d4-0f83-4076-afad-0a17b5ba5303'
+    // return this.petsService.unfavourite(req.user.userId, favouritePet.petId);
+    return this.petsService.unfavourite(userId, favouritePet.petId);
   }
 
   @Post('upload')

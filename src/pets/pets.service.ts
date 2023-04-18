@@ -1,7 +1,7 @@
 import { INestApplication, Injectable } from '@nestjs/common';
 import { CreatePetDto } from './dto/create-pet.dto';
 import { UpdatePetDto } from './dto/update-pet.dto';
-import { Pet, Prisma, } from '@prisma/client';
+import { Pet, Prisma, UserFavouritePetMapping, } from '@prisma/client';
 import { PrismaService } from '@src/primsa.service';
 import { Gender } from './entities/gender.enum';
 import { existsSync, rename, renameSync } from 'fs';
@@ -36,7 +36,7 @@ export class PetsService {
     return this.parsePetDto(pet);
   }
 
-  async findAll(variety?: string, gender?: Gender, minAge?: number, maxAge?: number): Promise<PetDto[]> {
+  async findAll(variety?: string, gender?: Gender, minAge?: number, maxAge?: number, userId?: string): Promise<PetDto[]> {
     const pets = await this.prisma.pet.findMany({
       where: {
         variety,
@@ -49,7 +49,19 @@ export class PetsService {
       }
     });
 
-    const petDtos: PetDto[] = await Promise.all(pets.map(async (pet: Pet) => await this.parsePetDto(pet)));
+    let favouritePetIds: number[] = []
+
+    if (!!userId) {
+      favouritePetIds = (await this.prisma.userFavouritePetMapping.findMany({
+        where: {
+          userId: userId
+        }
+      })).map(x => x.petId)
+    }
+
+    let petDtos = await Promise.all(pets.map(async (pet: Pet) => await this.parsePetDto(pet)))
+
+    petDtos = petDtos.map(p => ({ ...p, isFavourite: favouritePetIds.some(x => x == p.id) }))
 
     return petDtos;
   }
@@ -68,7 +80,10 @@ export class PetsService {
       variety: updatePetDto.variety,
       gender: updatePetDto.gender,
       age: updatePetDto.age,
+      imageFileName: updatePetDto.imageFileName
     }
+
+    this.imageManager.persistTmpImage(updatePetDto.imageFileName);
 
     const updatedPet = await this.prisma.pet.update({
       where: {
@@ -127,7 +142,8 @@ export class PetsService {
       variety: pet.variety,
       gender: pet.gender,
       age: pet.age,
-      imageUrl: await this.imageManager.getImageUrl(pet.imageFileName)
+      imageUrl: await this.imageManager.getImageUrl(pet.imageFileName),
+      isFavourite: null
     }
   }
 }

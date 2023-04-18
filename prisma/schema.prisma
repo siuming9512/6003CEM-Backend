@@ -23,7 +23,7 @@ model User {
   id       String    @id @default(uuid())
   username String
   password String
-  staffNo  String
+  staffNo  String?
   userChatRooms UserChatRoom[]
   userFavouritePets UserFavouritePetMapping[]
 }
