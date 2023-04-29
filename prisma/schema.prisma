@@ -11,50 +11,59 @@ datasource db {
 }
 
 model Pet {
-  id      Int    @id @default(autoincrement())
-  variety String
-  gender  String
-  age     Int
-  imageFileName String @default("")
+  id                Int                       @id @default(autoincrement())
+  variety           String
+  gender            String
+  age               Int
+  imageFileName     String                    @default("")
+  live              Boolean                   @default(true)
   userFavouritePets UserFavouritePetMapping[]
 }
 
 model User {
-  id       String    @id @default(uuid())
-  username String
-  password String
-  staffNo  String?
-  userChatRooms UserChatRoom[]
+  id                String                    @id @default(uuid())
+  username          String
+  password          String
+  staffNo           String?
+  userChatRooms     UserChatRoom[]
   userFavouritePets UserFavouritePetMapping[]
 }
 
 model UserFavouritePetMapping {
   userId String
-  user User  @relation(fields: [userId], references: [id])
-  petId Int
-  pet Pet @relation(fields: [petId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+  petId  Int
+  pet    Pet    @relation(fields: [petId], references: [id])
+
   @@id([userId, petId])
 }
 
 model ChatRoom {
-  id Int @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  chatMessages ChatMessage[]
-  userChatRooms UserChatRoom[]
+  id                   Int                    @id @default(autoincrement())
+  createdAt            DateTime               @default(now())
+  lastChatTime         DateTime?
+  chatMessages         ChatMessage[]
+  userChatRooms        UserChatRoom[]
+  UserChatUnReplyState UserChatUnReplyState[]
 }
 
 model ChatMessage {
-  id Int @id @default(autoincrement())
-  chatRoomId Int 
-  message String
-  sendBy String?
-  createdAt DateTime @default(now())
-  chatRoom ChatRoom @relation(fields: [chatRoomId], references: [id])
+  id         Int      @id @default(autoincrement())
+  chatRoomId Int
+  message    String
+  sendBy     String?
+  createdAt  DateTime @default(now())
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
 }
 
 model UserChatRoom {
-  chatRoomId Int @id @default(autoincrement())
-  chatRoom ChatRoom @relation(fields: [chatRoomId], references: [id])
-  userId String
-  user User @relation(fields: [userId], references: [id])
+  chatRoomId Int      @id @default(autoincrement())
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model UserChatUnReplyState {
+  chatRoomId Int      @id @default(autoincrement())
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
 }

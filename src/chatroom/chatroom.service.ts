@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ChatDto } from './dto/chat.dto';
 import { PrismaService } from '@src/primsa.service';
-import { ChatMessage, Prisma, UserChatRoom } from '@prisma/client';
+import { ChatMessage, ChatRoom, Prisma, UserChatRoom } from '@prisma/client';
+import { Chatroom } from './entities/chatroom.entity';
 
 @Injectable()
 export class ChatroomService {
@@ -12,14 +13,57 @@ export class ChatroomService {
 
   }
 
-  async getChatMsgsByUserId(userId: string): Promise<ChatMessage[]> {
+  async getChatrooms(): Promise<UserChatRoom[]> {
+    let chatRooms: UserChatRoom[] = await this.prisma.userChatRoom.findMany({
+      where: {
+        NOT: {
+          chatRoom: {
+            chatMessages: {
+              none: {}
+            }
+          }
+        }
+      },
+      include: {
+        user: {
+          select: {
+            username: true
+          }
+        },
+        chatRoom: {
+          include: {
+            chatMessages: {
+              orderBy: {
+                createdAt: 'desc'
+              },
+              select: {
+                createdAt: true,
+                message: true,
+                sendBy: true
+              },
+              take: 1
+            }
+          }
+        }
+      },
+      orderBy: {
+        chatRoom: {
+          lastChatTime: 'desc'
+        }
+      }
+    });
+
+    return chatRooms;
+  }
+
+  async getChatMsgsByChatroomId(chatroomId: number): Promise<ChatMessage[]> {
     let userChatRoom: UserChatRoom = await this.prisma.userChatRoom.findFirst({
       where: {
-        userId: userId
+        chatRoomId: +chatroomId
       }
     })
 
-    if(!userChatRoom) return [];
+    if (!userChatRoom) return [];
 
     const msgs = await this.prisma.chatMessage.findMany({
       where: {
@@ -30,39 +74,44 @@ export class ChatroomService {
     return msgs;
   }
 
-  async chat(userId: string, chatDto: ChatDto): Promise<ChatMessage> {
-    let userChatRoom: UserChatRoom = await this.prisma.userChatRoom.findFirst({
+  async getChatroom(userId: string): Promise<UserChatRoom> {
+    let userChatroom = await this.prisma.userChatRoom.findFirst({
       where: {
         userId: userId
       }
     })
 
-    if (!userChatRoom) {
-      const userChatroomInput: Prisma.UserChatRoomCreateInput = {
-        user: {
-          connect: {
-            id: userId
-          }
-        }, 
-        chatRoom: {
-          create: {
-            
-          }
-        }
-      }
-
-      userChatRoom = await this.prisma.userChatRoom.create({
-        data: userChatroomInput
-      });
+    if (!!userChatroom) {
+      return userChatroom
     }
 
+    const userChatroomInput: Prisma.UserChatRoomCreateInput = {
+      user: {
+        connect: {
+          id: userId
+        }
+      },
+      chatRoom: {
+        create: {
 
+        }
+      }
+    }
+
+    userChatroom = await this.prisma.userChatRoom.create({
+      data: userChatroomInput
+    });
+
+    return userChatroom
+  }
+
+  async chat(chatDto: ChatDto): Promise<ChatMessage> {
     const chatMessageInput: Prisma.ChatMessageCreateInput = {
       message: chatDto.message,
-      sendBy: userId,
+      sendBy: chatDto.sendBy,
       chatRoom: {
         connect: {
-          id: userChatRoom.chatRoomId
+          id: chatDto.chatroomId
         }
       }
     }

@@ -8,6 +8,7 @@ import { existsSync, rename, renameSync } from 'fs';
 import { join } from 'path';
 import { ImageManager } from '@src/image/imageManager.service';
 import { PetDto } from './dto/pet.dto';
+import { PetFilterDto } from './dto/petFilter.dto';
 
 @Injectable()
 export class PetsService {
@@ -25,7 +26,8 @@ export class PetsService {
       variety: createPetDto.variety,
       gender: createPetDto.gender,
       age: createPetDto.age,
-      imageFileName: createPetDto.imageFileName
+      imageFileName: createPetDto.imageFileName,
+      live: true
     }
     const pet = await this.prisma.pet.create({
       data: input
@@ -36,17 +38,27 @@ export class PetsService {
     return this.parsePetDto(pet);
   }
 
-  async findAll(variety?: string, gender?: Gender, minAge?: number, maxAge?: number, userId?: string): Promise<PetDto[]> {
+  async findAll(variety?: string, gender?: Gender, minAge?: number, maxAge?: number, isFavourite?: boolean, userId?: string): Promise<PetDto[]> {
+    let select: Prisma.PetWhereInput = {}
+
+    if (variety) {
+      select.variety = variety
+    }
+
+    if (gender) {
+      select.gender = gender
+    }
+
+    if (minAge || maxAge) {
+      select.AND = [
+        {
+          age: { gte: +minAge, lte: +maxAge }
+        }
+      ]
+    }
+
     const pets = await this.prisma.pet.findMany({
-      where: {
-        variety,
-        gender,
-        AND: [
-          {
-            age: { gte: minAge, lte: maxAge }
-          }
-        ]
-      }
+      where: select
     });
 
     let favouritePetIds: number[] = []
@@ -62,6 +74,10 @@ export class PetsService {
     let petDtos = await Promise.all(pets.map(async (pet: Pet) => await this.parsePetDto(pet)))
 
     petDtos = petDtos.map(p => ({ ...p, isFavourite: favouritePetIds.some(x => x == p.id) }))
+
+    if(isFavourite == true || isFavourite == false) {
+      petDtos = petDtos.filter(x => x.isFavourite == isFavourite)
+    }
 
     return petDtos;
   }
@@ -80,7 +96,8 @@ export class PetsService {
       variety: updatePetDto.variety,
       gender: updatePetDto.gender,
       age: updatePetDto.age,
-      imageFileName: updatePetDto.imageFileName
+      imageFileName: updatePetDto.imageFileName,
+      live: updatePetDto.live
     }
 
     this.imageManager.persistTmpImage(updatePetDto.imageFileName);
@@ -134,6 +151,30 @@ export class PetsService {
     })
 
     return !!unfavourited;
+  }
+
+  async getFilterOptions(): Promise<PetFilterDto> {
+    const varieties = await this.prisma.pet.findMany({
+      distinct: ['variety'],
+      select: {
+        variety: true
+      }
+    })
+
+    const ageAgg = await this.prisma.pet.aggregate({
+      _min: {
+        age: true
+      },
+      _max: {
+        age: true
+      }
+    })
+
+    return {
+      varieties: varieties.map(x => x.variety),
+      minAge: ageAgg._min.age,
+      maxAge: ageAgg._max.age,
+    }
   }
 
   private async parsePetDto(pet: Pet): Promise<PetDto> {

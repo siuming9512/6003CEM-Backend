@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, UseInterceptors, UploadedFile, Req, Query } from '@nestjs/common';
 import { PetsService } from './pets.service';
 import { CreatePetDto } from './dto/create-pet.dto';
 import { UpdatePetDto } from './dto/update-pet.dto';
@@ -12,6 +12,8 @@ import { createWriteStream } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import { ImageManager } from '@src/image/imageManager.service';
 import { PetDto } from './dto/pet.dto';
+import { Gender } from './entities/gender.enum';
+import { PetFilterDto } from './dto/petFilter.dto';
 
 @Controller('pets')
 @ApiTags('pets')
@@ -25,8 +27,22 @@ export class PetsController {
     isArray: true
   })
   @Get()
-  async findAll(keyword?: string): Promise<PetDto[]> {
-    return this.petsService.findAll(undefined, undefined, undefined, undefined, '836a83d4-0f83-4076-afad-0a17b5ba5303');
+  @UseGuards(JwtAuthGuard)
+  async findAll(@Request() req, @Query() query): Promise<PetDto[]> {
+    const userId = req.user.userId
+    return this.petsService.findAll(query.variety, query.gender, +query.minAge, +query.maxAge, query.isFavourite == '1', userId);
+  }
+
+
+  @ApiOkResponse({
+    description: 'The pets filter',
+    type: PetFilterDto,
+    isArray: true
+  })
+  @Get('filter')
+  async getFilterOptions(): Promise<PetFilterDto> {
+    // return this.petsService.unfavourite(req.user.userId, favouritePet.petId);
+    return await this.petsService.getFilterOptions();
   }
 
   @ApiOkResponse({
@@ -43,7 +59,7 @@ export class PetsController {
     type: PetEntity
   })
   @Post()
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async create(@Body() createPetDto: CreatePetDto): Promise<PetDto> {
     // const input = this.mapper.map<Prisma.PetCreateInput>(createPetDto, '');
     return this.petsService.create(createPetDto);
@@ -54,7 +70,7 @@ export class PetsController {
     type: PetEntity
   })
   @Patch(':id')
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async update(@Param('id') id: string, @Body() updatePetDto: UpdatePetDto): Promise<PetDto> {
     return this.petsService.update(+id, updatePetDto);
   }
@@ -64,7 +80,7 @@ export class PetsController {
     type: PetEntity
   })
   @Delete(':id')
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async remove(@Param('id') id: string): Promise<Pet> {
     return this.petsService.remove(+id);
   }
@@ -74,10 +90,10 @@ export class PetsController {
     description: 'save favourite pet',
     type: PetEntity
   })
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Post('favourite')
   async favourite(@Request() req, @Body() favouritePet: FavouritePet): Promise<boolean> {
-    const userId = '836a83d4-0f83-4076-afad-0a17b5ba5303'
+    const userId = req.user.userId
     // return this.petsService.favourite(req.user.userId, favouritePet.petId);
     return this.petsService.favourite(userId, favouritePet.petId);
   }
@@ -86,10 +102,10 @@ export class PetsController {
     description: 'unfavourite pet',
     type: PetEntity
   })
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Post('unfavourite')
   async unfavourite(@Request() req, @Body() favouritePet: FavouritePet): Promise<boolean> {
-    const userId = '836a83d4-0f83-4076-afad-0a17b5ba5303'
+    const userId = req.user.userId
     // return this.petsService.unfavourite(req.user.userId, favouritePet.petId);
     return this.petsService.unfavourite(userId, favouritePet.petId);
   }

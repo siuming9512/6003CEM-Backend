@@ -12,4 +12,6 @@ export class PetEntity implements Pet {
     age: number;
     @ApiProperty()
     imageFileName: string;
+    @ApiProperty()
+    live: boolean;
 }

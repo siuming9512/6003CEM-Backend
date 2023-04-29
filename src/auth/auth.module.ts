@@ -9,6 +9,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from './constants';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { AuthController } from './auth.controller';
+import { ChatroomService } from '@src/chatroom/chatroom.service';
 
 @Module({
   controllers: [AuthController],
@@ -23,6 +24,7 @@ import { AuthController } from './auth.controller';
   providers: [
     AuthService,
     UsersService,
+    ChatroomService,
     PrismaService,
     LocalStrategy,
     JwtStrategy

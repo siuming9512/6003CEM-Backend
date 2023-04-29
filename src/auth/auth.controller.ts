@@ -6,6 +6,7 @@ import { LoginDto } from './dto/login.dto';
 import { UserEntity } from './entities/user.entity';
 import { JwtLoginDto } from './dto/jwt-login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { ProfileDto } from './dto/profile.dto';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -25,9 +26,14 @@ export class AuthController {
     return jwt
   }
 
+  @ApiOkResponse({
+    type: ProfileDto
+  })
+  @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  getProfile(@Request() req) {
-    return req.user;
+  async getProfile(@Request() req) {
+    const profileDto = await this.authService.profile(req.user.username)
+    return profileDto;
   }
 }
