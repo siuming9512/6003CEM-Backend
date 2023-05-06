@@ -122,4 +122,14 @@ export class ChatroomService {
 
     return message
   }
+
+  async deleteMessage(messageId: number): Promise<boolean> {
+    const message = await this.prisma.chatMessage.delete({
+      where: {
+        id: messageId
+      }
+    })
+
+    return !!message
+  }
 }

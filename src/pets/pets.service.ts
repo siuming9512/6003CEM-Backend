@@ -38,7 +38,7 @@ export class PetsService {
     return this.parsePetDto(pet);
   }
 
-  async findAll(variety?: string, gender?: Gender, minAge?: number, maxAge?: number, isFavourite?: boolean, userId?: string): Promise<PetDto[]> {
+  async findAll(variety?: string, gender?: Gender, minAge?: number, maxAge?: number, isFavourite?: string, userId?: string): Promise<PetDto[]> {
     let select: Prisma.PetWhereInput = {}
 
     if (variety) {
@@ -75,8 +75,8 @@ export class PetsService {
 
     petDtos = petDtos.map(p => ({ ...p, isFavourite: favouritePetIds.some(x => x == p.id) }))
 
-    if(isFavourite == true || isFavourite == false) {
-      petDtos = petDtos.filter(x => x.isFavourite == isFavourite)
+    if(isFavourite == '1' || isFavourite == '0') {
+      petDtos = petDtos.filter(x => x.isFavourite == (isFavourite == '1'))
     }
 
     return petDtos;

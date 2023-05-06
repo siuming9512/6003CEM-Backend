@@ -1,4 +1,4 @@
-import { Controller, Request, Post, UseGuards, Body, HttpCode, Get } from '@nestjs/common';
+import { Controller, Request, Post, UseGuards, Body, HttpCode, Get, Query } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
@@ -7,6 +7,10 @@ import { UserEntity } from './entities/user.entity';
 import { JwtLoginDto } from './dto/jwt-login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { ProfileDto } from './dto/profile.dto';
+import { LoginExternalDto } from './dto/login-external.dto';
+import { RolesGuard } from './roles.guard';
+import { HasRoles } from './roles.decorator';
+import { Role } from './role.enum';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -14,7 +18,7 @@ import { ProfileDto } from './dto/profile.dto';
 export class AuthController {
   constructor(private authService: AuthService) { }
 
-  @UseGuards(LocalAuthGuard)
+  // @UseGuards(LocalAuthGuard)
   @Post('login')
   @ApiOkResponse({
     type: JwtLoginDto
@@ -22,6 +26,17 @@ export class AuthController {
   @HttpCode(200)
   async login(@Body() loginDto: LoginDto): Promise<JwtLoginDto> {
     const jwt = await this.authService.login(loginDto.username, loginDto.password);
+
+    return jwt
+  }
+
+  @Post('external')
+  @ApiOkResponse({
+    type: JwtLoginDto
+  })
+  @HttpCode(200)
+  async external(@Body() loginExternalDto: LoginExternalDto): Promise<JwtLoginDto> {
+    const jwt = await this.authService.loginExternal(loginExternalDto.token);
 
     return jwt
   }

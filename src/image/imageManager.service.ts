@@ -1,3 +1,4 @@
+import { BadRequestException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { createWriteStream, existsSync, rename, renameSync, unlink, unlinkSync } from "fs";
 import { join, dirname } from "path";
@@ -21,7 +22,7 @@ export class ImageManager {
         const tmpFile = `${this.#tmpImageFolderPath}/${fileName}`;
         const fileExisted = existsSync(tmpFile)
 
-        if (!fileExisted) throw 'file not exist.'
+        if (!fileExisted) throw new BadRequestException('file not exist.')
 
         const persistenceFile = `${this.#persistenceImageFolderPath}/${fileName}`
         renameSync(tmpFile, persistenceFile)

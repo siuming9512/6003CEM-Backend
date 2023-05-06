@@ -25,7 +25,6 @@ export class UsersController {
   findOne(@Param('username') username: string) {
     return this.userService.findOne(username);
   }
-
   // @Get()
   // findAll() {
   //   return this.usersService.findAll();

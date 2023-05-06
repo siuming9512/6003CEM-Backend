@@ -14,6 +14,9 @@ import { ImageManager } from '@src/image/imageManager.service';
 import { PetDto } from './dto/pet.dto';
 import { Gender } from './entities/gender.enum';
 import { PetFilterDto } from './dto/petFilter.dto';
+import { Role } from '@src/auth/role.enum';
+import { RolesGuard } from '@src/auth/roles.guard';
+import { HasRoles } from '@src/auth/roles.decorator';
 
 @Controller('pets')
 @ApiTags('pets')
@@ -27,10 +30,10 @@ export class PetsController {
     isArray: true
   })
   @Get()
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   async findAll(@Request() req, @Query() query): Promise<PetDto[]> {
-    const userId = req.user.userId
-    return this.petsService.findAll(query.variety, query.gender, +query.minAge, +query.maxAge, query.isFavourite == '1', userId);
+    const userId = req.user?.userId ?? null
+    return this.petsService.findAll(query.variety, query.gender, +query.minAge, +query.maxAge, query.isFavourite, userId);
   }
 
 
@@ -59,7 +62,8 @@ export class PetsController {
     type: PetEntity
   })
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @HasRoles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   async create(@Body() createPetDto: CreatePetDto): Promise<PetDto> {
     // const input = this.mapper.map<Prisma.PetCreateInput>(createPetDto, '');
     return this.petsService.create(createPetDto);
@@ -70,7 +74,8 @@ export class PetsController {
     type: PetEntity
   })
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
+  @HasRoles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   async update(@Param('id') id: string, @Body() updatePetDto: UpdatePetDto): Promise<PetDto> {
     return this.petsService.update(+id, updatePetDto);
   }
@@ -80,7 +85,8 @@ export class PetsController {
     type: PetEntity
   })
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @HasRoles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   async remove(@Param('id') id: string): Promise<Pet> {
     return this.petsService.remove(+id);
   }
@@ -90,7 +96,8 @@ export class PetsController {
     description: 'save favourite pet',
     type: PetEntity
   })
-  @UseGuards(JwtAuthGuard)
+  @HasRoles(Role.User)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Post('favourite')
   async favourite(@Request() req, @Body() favouritePet: FavouritePet): Promise<boolean> {
     const userId = req.user.userId
@@ -102,7 +109,8 @@ export class PetsController {
     description: 'unfavourite pet',
     type: PetEntity
   })
-  @UseGuards(JwtAuthGuard)
+  @HasRoles(Role.User)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Post('unfavourite')
   async unfavourite(@Request() req, @Body() favouritePet: FavouritePet): Promise<boolean> {
     const userId = req.user.userId
@@ -111,6 +119,8 @@ export class PetsController {
   }
 
   @Post('upload')
+  @HasRoles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @UseInterceptors(
     FileInterceptor('file', {
       limits: { fileSize: 2000000 }, //2MB

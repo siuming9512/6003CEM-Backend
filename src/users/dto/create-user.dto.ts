@@ -7,7 +7,7 @@ export class CreateUserDto {
     @IsString()
     username: string
     @ApiProperty()
-    password: string
+    password?: string
     @ApiProperty()
     @IsOptional()
     staffRegisterCode?: string
