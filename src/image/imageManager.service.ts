@@ -41,7 +41,6 @@ export class ImageManager {
     async getImageUrl(fileName: string) {
         const hostUrl = "http://localhost:3000";
         const filePath = `${hostUrl}/persistence/${fileName}`;
-        console.log(filePath);
         return filePath;
     }
 }

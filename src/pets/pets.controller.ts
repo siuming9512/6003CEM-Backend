@@ -3,7 +3,7 @@ import { PetsService } from './pets.service';
 import { CreatePetDto } from './dto/create-pet.dto';
 import { UpdatePetDto } from './dto/update-pet.dto';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { Prisma, Pet } from '@prisma/client';
+import { Prisma, Pet, UserFavouritePetMapping } from '@prisma/client';
 import { PetEntity } from './entities/pet.entities';
 import { FavouritePet } from './dto/favourite-pet.dto';
 import { JwtAuthGuard } from '@src/auth/guards/jwt-auth.guard';
@@ -30,10 +30,8 @@ export class PetsController {
     isArray: true
   })
   @Get()
-  // @UseGuards(JwtAuthGuard)
   async findAll(@Request() req, @Query() query): Promise<PetDto[]> {
-    const userId = req.user?.userId ?? null
-    return this.petsService.findAll(query.variety, query.gender, +query.minAge, +query.maxAge, query.isFavourite, userId);
+    return this.petsService.findAll(query.variety, query.gender, +query.minAge, +query.maxAge);
   }
 
 
@@ -52,8 +50,8 @@ export class PetsController {
     description: 'The pet record',
     type: PetEntity
   })
-  @Get(':id')
-  async findOne(@Param('id') id: string): Promise<PetDto> {
+  @Get()
+  async findOne(@Query('id') id: string): Promise<PetDto> {
     return this.petsService.findOne(+id);
   }
 
@@ -94,8 +92,16 @@ export class PetsController {
 
   @ApiOkResponse({
     description: 'save favourite pet',
-    type: PetEntity
+    type: Number
   })
+  @HasRoles(Role.User)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Get('favourite')
+  async getFavourites(@Request() req): Promise<number[]> {
+    const userId = req.user.userId
+    return await this.petsService.getFavourites(userId);
+  }
+
   @HasRoles(Role.User)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Post('favourite')

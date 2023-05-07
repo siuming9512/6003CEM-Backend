@@ -41,7 +41,11 @@ export class UsersService {
     }
 
     const saltOrRounds = 10;
-    const hash = await bcrypt.hash(createUserDto.password, saltOrRounds);
+    let hash = null
+    
+    if(createUserDto.password) {
+      hash = await bcrypt.hash(createUserDto.password, saltOrRounds);
+    }
 
     let userCreateInput: Prisma.UserCreateInput = {
       username: createUserDto.username,

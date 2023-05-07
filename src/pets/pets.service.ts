@@ -38,7 +38,7 @@ export class PetsService {
     return this.parsePetDto(pet);
   }
 
-  async findAll(variety?: string, gender?: Gender, minAge?: number, maxAge?: number, isFavourite?: string, userId?: string): Promise<PetDto[]> {
+  async findAll(variety?: string, gender?: Gender, minAge?: number, maxAge?: number): Promise<PetDto[]> {
     let select: Prisma.PetWhereInput = {}
 
     if (variety) {
@@ -61,23 +61,7 @@ export class PetsService {
       where: select
     });
 
-    let favouritePetIds: number[] = []
-
-    if (!!userId) {
-      favouritePetIds = (await this.prisma.userFavouritePetMapping.findMany({
-        where: {
-          userId: userId
-        }
-      })).map(x => x.petId)
-    }
-
     let petDtos = await Promise.all(pets.map(async (pet: Pet) => await this.parsePetDto(pet)))
-
-    petDtos = petDtos.map(p => ({ ...p, isFavourite: favouritePetIds.some(x => x == p.id) }))
-
-    if(isFavourite == '1' || isFavourite == '0') {
-      petDtos = petDtos.filter(x => x.isFavourite == (isFavourite == '1'))
-    }
 
     return petDtos;
   }
@@ -122,6 +106,16 @@ export class PetsService {
     this.imageManager.deleteImage(deletedPet.imageFileName)
 
     return deletedPet;
+  }
+
+  async getFavourites(userId: string): Promise<number[]> {
+    const favourites = await this.prisma.userFavouritePetMapping.findMany({
+      where: {
+        userId: userId
+      }
+    })
+
+    return favourites.map(x => x.petId);
   }
 
   async favourite(userId: string, petId): Promise<boolean> {
