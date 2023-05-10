@@ -1,8 +1,8 @@
 import { Global, Module } from '@nestjs/common';
 import { PetsService } from './pets.service';
 import { PetsController } from './pets.controller';
-import { PrismaService } from '@src/primsa.service';
-import { ImageManager } from '@src/image/imageManager.service';
+import { PrismaService } from '../primsa.service';
+import { ImageManager } from '../image/imageManager.service';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({

@@ -2,11 +2,11 @@ import { INestApplication, Injectable } from '@nestjs/common';
 import { CreatePetDto } from './dto/create-pet.dto';
 import { UpdatePetDto } from './dto/update-pet.dto';
 import { Pet, Prisma, UserFavouritePetMapping, } from '@prisma/client';
-import { PrismaService } from '@src/primsa.service';
+import { PrismaService } from '../primsa.service';
 import { Gender } from './entities/gender.enum';
 import { existsSync, rename, renameSync } from 'fs';
 import { join } from 'path';
-import { ImageManager } from '@src/image/imageManager.service';
+import { ImageManager } from '../image/imageManager.service';
 import { PetDto } from './dto/pet.dto';
 import { PetFilterDto } from './dto/petFilter.dto';
 

@@ -1,11 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { PrismaService } from '@src/primsa.service';
-import { UsersService } from '@src/users/users.service';
+import { PrismaService } from '../primsa.service';
+import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import { JwtLoginDto } from './dto/jwt-login.dto';
 import { ProfileDto } from './dto/profile.dto';
-import { ChatroomService } from '@src/chatroom/chatroom.service';
+import { ChatroomService } from '../chatroom/chatroom.service';
 import axios from 'axios';
 import * as bcrypt from 'bcrypt';
 

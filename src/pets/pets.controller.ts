@@ -6,17 +6,17 @@ import { ApiBearerAuth, ApiBody, ApiConsumes, ApiCreatedResponse, ApiOkResponse,
 import { Prisma, Pet, UserFavouritePetMapping } from '@prisma/client';
 import { PetEntity } from './entities/pet.entities';
 import { FavouritePet } from './dto/favourite-pet.dto';
-import { JwtAuthGuard } from '@src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { createWriteStream } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
-import { ImageManager } from '@src/image/imageManager.service';
+import { ImageManager } from '../image/imageManager.service';
 import { PetDto } from './dto/pet.dto';
 import { Gender } from './entities/gender.enum';
 import { PetFilterDto } from './dto/petFilter.dto';
-import { Role } from '@src/auth/role.enum';
-import { RolesGuard } from '@src/auth/roles.guard';
-import { HasRoles } from '@src/auth/roles.decorator';
+import { Role } from '../auth/role.enum';
+import { RolesGuard } from '../auth/roles.guard';
+import { HasRoles } from '../auth/roles.decorator';
 
 @Controller('pets')
 @ApiTags('pets')
