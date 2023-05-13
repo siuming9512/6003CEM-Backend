@@ -19,9 +19,10 @@ export class ImageManager {
     }
 
     persistTmpImage(fileName: string) {
+        if(!fileName) return;
         const tmpFile = `${this.#tmpImageFolderPath}/${fileName}`;
         const fileExisted = existsSync(tmpFile)
-
+        console.log(tmpFile);
         if (!fileExisted) throw new BadRequestException('file not exist.')
 
         const persistenceFile = `${this.#persistenceImageFolderPath}/${fileName}`
